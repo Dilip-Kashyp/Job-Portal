@@ -143,7 +143,7 @@ const JobSeekerHome = () => {
 
       <Layout>
         <Header className="bg-white shadow-md flex justify-between items-center px-4 md:px-6">
-          <div className="text-xl font-semibold">Welcome, Job Seeker</div>
+          <div className="text-xl font-semibold ml-10">Welcome, Job Seeker</div>
           <Button
             type="primary"
             className="bg-blue-600 hidden md:block"

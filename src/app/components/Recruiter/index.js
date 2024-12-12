@@ -24,6 +24,8 @@ const RecruiterHome = () => {
   const [jobs, setJobs] = useState([]);
   const [applicants, setApplicants] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [currentView, setCurrentView] = useState("dashboard");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -53,7 +55,6 @@ const RecruiterHome = () => {
         message: "Job Created!",
         description: "Job has been successfully created.",
       });
-      console.log("Job created successfully!");
       fetchJobs();
       setVisible(false);
     } catch (error) {
@@ -66,6 +67,7 @@ const RecruiterHome = () => {
       const res = await fetchApplicants({ jobId });
       setApplicants(res.data);
       setSelectedJob(jobId);
+      setCurrentView("applicants");
       setApplicantsModalVisible(true);
     } catch (error) {
       showNotification({
@@ -74,10 +76,6 @@ const RecruiterHome = () => {
         description: "No application for this job",
       });
     }
-  };
-
-  const handleViewApplicants = (jobId) => {
-    fetchJobApplicants(jobId);
   };
 
   const handleOfferLetter = async (applicant, jobId, status) => {
@@ -91,6 +89,7 @@ const RecruiterHome = () => {
             ? `${applicant.name} has been rejected.`
             : `Offer letter sent to ${applicant.name} (${applicant.email})`,
       });
+      fetchJobApplicants(jobId);
     } catch (err) {
       console.log(err);
       showNotification({
@@ -102,19 +101,63 @@ const RecruiterHome = () => {
 
   const menuItems = [
     {
-      key: "1",
+      key: "dashboard",
       label: "Dashboard",
+      onClick: () => {
+        setCurrentView("dashboard");
+        setIsMobileMenuOpen(false);
+      },
     },
     {
-      key: "2",
+      key: "create-job",
       label: "Create Job",
-      onClick: () => setVisible(true),
+      onClick: () => {
+        setVisible(true);
+        setIsMobileMenuOpen(false);
+      },
     },
   ];
 
   return (
     <Layout className="h-screen">
-      <Sider width={250} className="bg-gray-800 text-white">
+      {/* Mobile Menu Toggle */}
+      <div className="md:hidden absolute top-4 left-4 z-50">
+        <Button 
+          type="text" 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="text-gray-800"
+        >
+          {isMobileMenuOpen ? '✕' : '☰'}
+        </Button>
+      </div>
+
+      {/* Mobile Sidebar */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed inset-0 bg-gray-800 text-white z-40 p-6">
+          <div className="text-center text-2xl font-bold text-white mt-6 mb-6">
+            Recruiter Dashboard
+          </div>
+          <Menu 
+            theme="dark" 
+            mode="inline" 
+            items={menuItems} 
+            className="bg-transparent"
+          />
+          <Button
+            type="primary"
+            className="w-full mt-4 bg-red-600"
+            onClick={() => router.push("/login")}
+          >
+            Log out
+          </Button>
+        </div>
+      )}
+
+      {/* Desktop Sidebar */}
+      <Sider 
+        width={250} 
+        className="bg-gray-800 text-white hidden md:block"
+      >
         <div className="text-center text-2xl font-bold text-white mt-6">
           Recruiter Dashboard
         </div>
@@ -122,39 +165,100 @@ const RecruiterHome = () => {
       </Sider>
 
       <Layout>
-        <Header className="bg-white shadow-md flex justify-between items-center px-6">
-          <div className="text-xl font-semibold">Welcome, Recruiter</div>
+        <Header className="bg-white shadow-md flex justify-between items-center px-4 md:px-6">
+          <div className="text-xl font-semibold ml-10">Welcome, Recruiter</div>
           <Button
             type="primary"
-            className="bg-blue-600"
+            className="bg-blue-600 hidden md:block"
             onClick={() => router.push("/login")}
           >
             Log out
           </Button>
         </Header>
 
-        <Content className="p-6 bg-gray-100">
-          <h2 className="text-2xl font-bold mb-6">Posted Jobs</h2>
+        <Content className="p-4 md:p-6 bg-gray-100">
+          <h2 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">
+            {currentView === "dashboard" ? "Posted Jobs" : "Job Applicants"}
+          </h2>
 
           <List
-            grid={{ gutter: 16, column: 3 }}
-            dataSource={jobs}
-            renderItem={(job) => (
+            grid={{ 
+              xs: 1,   // 1 column on mobile 
+              sm: 2,   // 2 columns on small screens
+              md: 3,   // 3 columns on medium and larger screens
+              gutter: 16 
+            }}
+            dataSource={currentView === "dashboard" ? jobs : applicants}
+            renderItem={(item) => (
               <List.Item>
                 <Card
-                  title={job.jobname ? job.jobname : "Unnamed Job"}
+                  title={
+                    currentView === "dashboard" 
+                      ? (item.jobname || "Unnamed Job") 
+                      : (item.name || "Unnamed Applicant")
+                  }
                   bordered={false}
-                  className="shadow-md"
+                  className="shadow-md w-full"
                   hoverable
-                  onClick={() => handleViewApplicants(job.id)}
-                />
+                  actions={
+                    currentView === "dashboard"
+                      ? [
+                          <Button
+                            type="primary"
+                            onClick={() => fetchJobApplicants(item.id)}
+                            className="w-full"
+                          >
+                            View Applicants
+                          </Button>,
+                        ]
+                      : [
+                          <Button
+                            type="primary"
+                            disabled={item.applied_status === "accepted"}
+                            onClick={() => 
+                              handleOfferLetter(
+                                item, 
+                                selectedJob, 
+                                "job_offered"
+                              )
+                            }
+                            className="w-full"
+                          >
+                            {item.applied_status === "accepted" 
+                              ? "Offer Accepted" 
+                              : "Offer Job"}
+                          </Button>,
+                          <Button
+                            type="danger"
+                            onClick={() => 
+                              handleOfferLetter(
+                                item, 
+                                selectedJob, 
+                                "rejected"
+                              )
+                            }
+                            className="w-full"
+                          >
+                            Reject
+                          </Button>
+                        ]
+                  }
+                >
+                  {currentView === "applicants" && (
+                    <div>
+                      <p><strong>Email:</strong> {item.email}</p>
+                      <p><strong>Status:</strong> {item.applied_status}</p>
+                    </div>
+                  )}
+                </Card>
               </List.Item>
             )}
           />
 
+          {/* Job Creation Modal */}
           <Modal
             title="Create New Job"
-            visible={visible}
+            open={visible}
             onCancel={() => setVisible(false)}
             onOk={handleJobSubmit}
             okText="Create"
@@ -168,67 +272,6 @@ const RecruiterHome = () => {
                 />
               </Form.Item>
             </Form>
-          </Modal>
-
-          <Modal
-            title="Job Applicants"
-            visible={applicantsModalVisible}
-            onCancel={() => setApplicantsModalVisible(false)}
-            width={"50%"}
-            footer={[
-              <Button
-                key="close"
-                onClick={() => setApplicantsModalVisible(false)}
-              >
-                Close
-              </Button>,
-            ]}
-          >
-            {applicants.length > 0 ? (
-              <List
-                bordered
-                dataSource={applicants}
-                renderItem={(applicant) => (
-                  <List.Item>
-                    <div>
-                      <strong>Name:</strong> {applicant.name}
-                    </div>
-                    <div>
-                      <strong>Email:</strong> {applicant.email}
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <Button
-                        type="primary"
-                        disabled={
-                          applicant.applied_status === "accepted" ? true : false
-                        }
-                        onClick={() =>
-                          handleOfferLetter(
-                            applicant,
-                            selectedJob,
-                            "job_offered"
-                          )
-                        }
-                      >
-                        {applicant.applied_status === "accepted"
-                          ? "Offer accepted"
-                          : "Offer job"}
-                      </Button>
-                      <Button
-                        type="danger"
-                        onClick={() =>
-                          handleOfferLetter(applicant, selectedJob, "rejected")
-                        }
-                      >
-                        Reject
-                      </Button>
-                    </div>
-                  </List.Item>
-                )}
-              />
-            ) : (
-              <div>No applicants found.</div>
-            )}
           </Modal>
         </Content>
       </Layout>
