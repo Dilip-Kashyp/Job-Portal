@@ -1,4 +1,4 @@
-import 'antd/dist/antd.css'; // Import Ant Design styles
+import 'antd/dist/reset.css'; // Import Ant Design styles
 import './globals.css'; // Your custom styles
 import localFont from "next/font/local";
 import "./globals.css";
