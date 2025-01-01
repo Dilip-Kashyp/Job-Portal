@@ -1,9 +1,15 @@
 "use client";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Form, Input, Button, Typography, Card } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Typography,
+  Card,
+  useState,
+} from "@/dependency";
 import { loginHandler } from "@/api";
-import  showNotification  from "../../Notifaction/index";
+import { showNotification } from "@/components";
 const { Title } = Typography;
 
 function LoginForm() {

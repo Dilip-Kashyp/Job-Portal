@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { List, Card, Layout, Button, Menu } from "antd";
+import { List, Card, Layout, Button, Menu } from "@/dependency";
 import { fetchjob, fetchAppliedJobs, applyForJob, acceptOffer } from "@/api";
 import { useRouter } from "next/navigation";
-import showNotification from "../Notifaction";
+import { showNotification } from "@/components";
 
 const { Sider, Content, Header } = Layout;
 
@@ -57,7 +57,7 @@ const JobSeekerHome = () => {
   };
 
   const handleAcceptOffer = async (job) => {
-    console.log("ege", job, job.id)
+    console.log("ege", job, job.id);
     try {
       await acceptOffer(job.id, "accept");
       showNotification({
@@ -99,12 +99,12 @@ const JobSeekerHome = () => {
     <Layout className="h-screen">
       {/* Mobile Menu Toggle */}
       <div className="md:hidden absolute top-4 left-4 z-50">
-        <Button 
-          type="text" 
+        <Button
+          type="text"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="text-gray-800"
         >
-          {isMobileMenuOpen ? '✕' : '☰'}
+          {isMobileMenuOpen ? "✕" : "☰"}
         </Button>
       </div>
 
@@ -114,10 +114,10 @@ const JobSeekerHome = () => {
           <div className="text-center text-2xl font-bold text-white mt-6 mb-6">
             Job Seeker Dashboard
           </div>
-          <Menu 
-            theme="dark" 
-            mode="inline" 
-            items={menuItems} 
+          <Menu
+            theme="dark"
+            mode="inline"
+            items={menuItems}
             className="bg-transparent"
           />
           <Button
@@ -131,10 +131,7 @@ const JobSeekerHome = () => {
       )}
 
       {/* Desktop Sidebar */}
-      <Sider 
-        width={250} 
-        className="bg-gray-800 text-white hidden md:block"
-      >
+      <Sider width={250} className="bg-gray-800 text-white hidden md:block">
         <div className="text-center text-2xl font-bold text-white mt-6">
           Job Seeker Dashboard
         </div>
@@ -159,11 +156,11 @@ const JobSeekerHome = () => {
           </h2>
 
           <List
-            grid={{ 
-              xs: 1,   // 1 column on mobile 
-              sm: 2,   // 2 columns on small screens
-              md: 3,   // 3 columns on medium and larger screens
-              gutter: 16 
+            grid={{
+              xs: 1, // 1 column on mobile
+              sm: 2, // 2 columns on small screens
+              md: 3, // 3 columns on medium and larger screens
+              gutter: 16,
             }}
             dataSource={currentView === "dashboard" ? jobs : appliedJobs?.data}
             renderItem={(job) => (

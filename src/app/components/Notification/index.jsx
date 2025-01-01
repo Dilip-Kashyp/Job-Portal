@@ -1,6 +1,7 @@
+
 import React from "react";
 
-const showNotification = ({
+const Notification = ({
   type,
   message = "Error Occurred!",
   description = "Something went wrong. Please try again.",
@@ -33,4 +34,4 @@ const showNotification = ({
   }, 3000);
 };
 
-export default showNotification;
+export default Notification;

@@ -1,4 +1,5 @@
-const BASE_URL = "140.245.236.72/api/v1";
+const BASE_URL = "http://140.245.236.72/api/v1";
+
 
 export async function apiClient({
   url,
@@ -22,7 +23,7 @@ export async function apiClient({
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! : ${response}`);
     }
 
     const data = await response.json();

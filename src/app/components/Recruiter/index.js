@@ -10,11 +10,10 @@ import {
   Form,
   Input,
   message,
-} from "antd";
+} from "@/dependency";
 import { useRouter } from "next/navigation";
 import { fetchjob, createjob, fetchApplicants, updateJobStatus } from "@/api";
-import showNotification from "../Notifaction";
-
+import { showNotification } from "@/components";
 const { Sider, Content, Header } = Layout;
 
 const RecruiterHome = () => {
@@ -122,12 +121,12 @@ const RecruiterHome = () => {
     <Layout className="h-screen">
       {/* Mobile Menu Toggle */}
       <div className="md:hidden absolute top-4 left-4 z-50">
-        <Button 
-          type="text" 
+        <Button
+          type="text"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           className="text-gray-800"
         >
-          {isMobileMenuOpen ? '✕' : '☰'}
+          {isMobileMenuOpen ? "✕" : "☰"}
         </Button>
       </div>
 
@@ -137,10 +136,10 @@ const RecruiterHome = () => {
           <div className="text-center text-2xl font-bold text-white mt-6 mb-6">
             Recruiter Dashboard
           </div>
-          <Menu 
-            theme="dark" 
-            mode="inline" 
-            items={menuItems} 
+          <Menu
+            theme="dark"
+            mode="inline"
+            items={menuItems}
             className="bg-transparent"
           />
           <Button
@@ -154,10 +153,7 @@ const RecruiterHome = () => {
       )}
 
       {/* Desktop Sidebar */}
-      <Sider 
-        width={250} 
-        className="bg-gray-800 text-white hidden md:block"
-      >
+      <Sider width={250} className="bg-gray-800 text-white hidden md:block">
         <div className="text-center text-2xl font-bold text-white mt-6">
           Recruiter Dashboard
         </div>
@@ -182,20 +178,20 @@ const RecruiterHome = () => {
           </h2>
 
           <List
-            grid={{ 
-              xs: 1,   // 1 column on mobile 
-              sm: 2,   // 2 columns on small screens
-              md: 3,   // 3 columns on medium and larger screens
-              gutter: 16 
+            grid={{
+              xs: 1, // 1 column on mobile
+              sm: 2, // 2 columns on small screens
+              md: 3, // 3 columns on medium and larger screens
+              gutter: 16,
             }}
             dataSource={currentView === "dashboard" ? jobs : applicants}
             renderItem={(item) => (
               <List.Item>
                 <Card
                   title={
-                    currentView === "dashboard" 
-                      ? (item.jobname || "Unnamed Job") 
-                      : (item.name || "Unnamed Applicant")
+                    currentView === "dashboard"
+                      ? item.jobname || "Unnamed Job"
+                      : item.name || "Unnamed Applicant"
                   }
                   bordered={false}
                   className="shadow-md w-full"
@@ -215,39 +211,39 @@ const RecruiterHome = () => {
                           <Button
                             type="primary"
                             disabled={item.applied_status === "accepted"}
-                            onClick={() => 
+                            onClick={() =>
                               handleOfferLetter(
-                                item, 
-                                selectedJob, 
+                                item,
+                                selectedJob,
                                 "job_offered"
                               )
                             }
                             className="w-full"
                           >
-                            {item.applied_status === "accepted" 
-                              ? "Offer Accepted" 
+                            {item.applied_status === "accepted"
+                              ? "Offer Accepted"
                               : "Offer Job"}
                           </Button>,
                           <Button
                             type="danger"
-                            onClick={() => 
-                              handleOfferLetter(
-                                item, 
-                                selectedJob, 
-                                "rejected"
-                              )
+                            onClick={() =>
+                              handleOfferLetter(item, selectedJob, "rejected")
                             }
                             className="w-full"
                           >
                             Reject
-                          </Button>
+                          </Button>,
                         ]
                   }
                 >
                   {currentView === "applicants" && (
                     <div>
-                      <p><strong>Email:</strong> {item.email}</p>
-                      <p><strong>Status:</strong> {item.applied_status}</p>
+                      <p>
+                        <strong>Email:</strong> {item.email}
+                      </p>
+                      <p>
+                        <strong>Status:</strong> {item.applied_status}
+                      </p>
                     </div>
                   )}
                 </Card>

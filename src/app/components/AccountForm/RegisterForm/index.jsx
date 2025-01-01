@@ -1,8 +1,8 @@
 "use client";
-import { registerHandler } from "@/api";
 import { useRouter } from "next/navigation";
-import { Form, Input, Button, Select, Typography, Card } from "antd";
-import showNotification from "../../Notifaction/index";
+import { registerHandler } from "@/api";
+import { Form, Input, Button, Select, Typography, Card } from "@/dependency";
+import { showNotification } from "@/components";
 const { Title } = Typography;
 const { Option } = Select;
 
