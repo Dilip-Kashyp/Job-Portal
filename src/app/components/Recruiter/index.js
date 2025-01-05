@@ -12,13 +12,12 @@ import {
   message,
 } from "@/dependency";
 import { useRouter } from "next/navigation";
-import { fetchjob, createjob, fetchApplicants, updateJobStatus } from "@/api";
-import { showNotification } from "@/components";
+import { fetchjob, fetchApplicants, updateJobStatus } from "@/api";
+import { showNotification, JobCreateForm, JobCard } from "@/components";
 const { Sider, Content, Header } = Layout;
 
-const RecruiterHome = () => {
+const Recruiter = ({ user }) => {
   const [visible, setVisible] = useState(false);
-  const [applicantsModalVisible, setApplicantsModalVisible] = useState(false);
   const [jobName, setJobName] = useState("");
   const [jobs, setJobs] = useState([]);
   const [applicants, setApplicants] = useState([]);
@@ -40,27 +39,6 @@ const RecruiterHome = () => {
     }
   };
 
-  const handleJobSubmit = async () => {
-    if (!jobName) {
-      message.error("Job name is required!");
-      return;
-    }
-
-    try {
-      const res = await createjob({ jobName });
-      setJobs(res);
-      showNotification({
-        type: "success",
-        message: "Job Created!",
-        description: "Job has been successfully created.",
-      });
-      fetchJobs();
-      setVisible(false);
-    } catch (error) {
-      console.log("Error creating job");
-    }
-  };
-
   const fetchJobApplicants = async (jobId) => {
     try {
       const res = await fetchApplicants({ jobId });
@@ -77,26 +55,7 @@ const RecruiterHome = () => {
     }
   };
 
-  const handleOfferLetter = async (applicant, jobId, status) => {
-    try {
-      await updateJobStatus(jobId, status);
-      showNotification({
-        type: status === "rejected" ? "error" : "success",
-        message: status === "rejected" ? "Rejected" : "Sent",
-        description:
-          status === "rejected"
-            ? `${applicant.name} has been rejected.`
-            : `Offer letter sent to ${applicant.name} (${applicant.email})`,
-      });
-      fetchJobApplicants(jobId);
-    } catch (err) {
-      console.log(err);
-      showNotification({
-        type: "error",
-        message: "",
-      });
-    }
-  };
+ 
 
   const menuItems = [
     {
@@ -119,7 +78,6 @@ const RecruiterHome = () => {
 
   return (
     <Layout className="h-screen">
-      {/* Mobile Menu Toggle */}
       <div className="md:hidden absolute top-4 left-4 z-50">
         <Button
           type="text"
@@ -130,7 +88,6 @@ const RecruiterHome = () => {
         </Button>
       </div>
 
-      {/* Mobile Sidebar */}
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 bg-gray-800 text-white z-40 p-6">
           <div className="text-center text-2xl font-bold text-white mt-6 mb-6">
@@ -151,8 +108,6 @@ const RecruiterHome = () => {
           </Button>
         </div>
       )}
-
-      {/* Desktop Sidebar */}
       <Sider width={250} className="bg-gray-800 text-white hidden md:block">
         <div className="text-center text-2xl font-bold text-white mt-6">
           Recruiter Dashboard
@@ -162,7 +117,7 @@ const RecruiterHome = () => {
 
       <Layout>
         <Header className="bg-white shadow-md flex justify-between items-center px-4 md:px-6">
-          <div className="text-xl font-semibold ml-10">Welcome, Recruiter</div>
+          <div className="text-xl font-semibold ml-6">Welcome, {user?.user?.name} </div>
           <Button
             type="primary"
             className="bg-blue-600 hidden md:block"
@@ -177,102 +132,23 @@ const RecruiterHome = () => {
             {currentView === "dashboard" ? "Posted Jobs" : "Job Applicants"}
           </h2>
 
-          <List
-            grid={{
-              xs: 1, // 1 column on mobile
-              sm: 2, // 2 columns on small screens
-              md: 3, // 3 columns on medium and larger screens
-              gutter: 16,
-            }}
-            dataSource={currentView === "dashboard" ? jobs : applicants}
-            renderItem={(item) => (
-              <List.Item>
-                <Card
-                  title={
-                    currentView === "dashboard"
-                      ? item.jobname || "Unnamed Job"
-                      : item.name || "Unnamed Applicant"
-                  }
-                  bordered={false}
-                  className="shadow-md w-full"
-                  hoverable
-                  actions={
-                    currentView === "dashboard"
-                      ? [
-                          <Button
-                            type="primary"
-                            onClick={() => fetchJobApplicants(item.id)}
-                            className="w-full"
-                          >
-                            View Applicants
-                          </Button>,
-                        ]
-                      : [
-                          <Button
-                            type="primary"
-                            disabled={item.applied_status === "accepted"}
-                            onClick={() =>
-                              handleOfferLetter(
-                                item,
-                                selectedJob,
-                                "job_offered"
-                              )
-                            }
-                            className="w-full"
-                          >
-                            {item.applied_status === "accepted"
-                              ? "Offer Accepted"
-                              : "Offer Job"}
-                          </Button>,
-                          <Button
-                            type="danger"
-                            onClick={() =>
-                              handleOfferLetter(item, selectedJob, "rejected")
-                            }
-                            className="w-full"
-                          >
-                            Reject
-                          </Button>,
-                        ]
-                  }
-                >
-                  {currentView === "applicants" && (
-                    <div>
-                      <p>
-                        <strong>Email:</strong> {item.email}
-                      </p>
-                      <p>
-                        <strong>Status:</strong> {item.applied_status}
-                      </p>
-                    </div>
-                  )}
-                </Card>
-              </List.Item>
-            )}
+          <JobCard
+            jobs={jobs}
+            currentView={currentView}
+            applicants={applicants}
+            fetchJobApplicants={fetchJobApplicants}
+            selectedJob={selectedJob}
           />
-
-          {/* Job Creation Modal */}
-          <Modal
-            title="Create New Job"
-            open={visible}
-            onCancel={() => setVisible(false)}
-            onOk={handleJobSubmit}
-            okText="Create"
-          >
-            <Form layout="vertical">
-              <Form.Item label="Job Name" required>
-                <Input
-                  value={jobName}
-                  onChange={(e) => setJobName(e.target.value)}
-                  placeholder="Enter job title"
-                />
-              </Form.Item>
-            </Form>
-          </Modal>
+          <JobCreateForm
+            visible={visible}
+            setVisible={setVisible}
+            jobName={jobName}
+            setJobName={setJobName}
+          />
         </Content>
       </Layout>
     </Layout>
   );
 };
 
-export default RecruiterHome;
+export default Recruiter;

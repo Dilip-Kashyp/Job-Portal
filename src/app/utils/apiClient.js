@@ -1,4 +1,5 @@
-const BASE_URL = "http://140.245.236.72/api/v1";
+// const BASE_URL = "http://140.245.236.72/api/v1";
+const BASE_URL = "http://localhost:5400/api/v1";
 
 
 export async function apiClient({

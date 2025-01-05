@@ -2,13 +2,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getUserInfo } from "@/api"; 
-import JobSeekerHome from "../components/Jobseeker";
-import RecruiterHome from "../components/Recruiter";
+import { SideBar, Jobseeker, Recruiter } from "@/components";
+
 
 const Home = () => {
   const [userType, setUserType] = useState(null); 
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     fetchUserType(); 
@@ -19,6 +20,7 @@ const Home = () => {
       const user = await getUserInfo();
       setUserType(user.user.role); 
       setLoading(false);
+      setUser(user);
     } catch (error) {
       console.error("Error fetching user info:", error);
       router.push("/login"); 
@@ -29,8 +31,8 @@ const Home = () => {
 
   return (
     <>
-      {userType === "recruiter" && <RecruiterHome />}
-      {userType === "applicant" && <JobSeekerHome />}
+      {userType === "recruiter" && <Recruiter user={user} />}
+      {userType === "applicant" && <Jobseeker user={user} />}
     </>
   );
 };
